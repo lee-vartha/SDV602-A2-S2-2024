@@ -1,43 +1,41 @@
+# importing libraries that would be used for this project
 import PySimpleGUI as sg
-from lobby import create_lobby_window  # Import lobby window creation
-from screens import navigate_des  # Import chart navigator for charts
+from lobby import create_lobby_window 
+from screens import navigate_des
 
-# Start with the lobby window first
+# ensuring the current window is always the lobby page
 current_window = create_lobby_window()
 
+# while that is happening (so that the window is kept open)
 while True:
     event, values = current_window.read()
 
-    # If the window is closed or exit is clicked
+    # if the user chooses to close the application, the window is then closed
     if event == sg.WIN_CLOSED or event == 'Exit Application':
         break
 
-
-    # Handle transitions to charts based on buttons in the lobby
+        # if in the lobby, if the user clicks on any of the buttons, the window is closed and the user is taken to the corresponding page
     if event == 'Data Chart 1':
-        current_window.close()  # Close the current lobby window
-        current_window = navigate_des(1)  # Navigate to chart 1
+        current_window.close()
+        current_window = navigate_des(1)
 
     elif event == 'Data Chart 2':
-        current_window.close()  # Close the current lobby window
-        current_window = navigate_des(2)  # Navigate to chart 2
+        current_window.close()
+        current_window = navigate_des(2)
 
     elif event == 'Data Chart 3':
-        current_window.close()  # Close the current lobby window
-        current_window = navigate_des(3)  # Navigate to chart 3
+        current_window.close() 
+        current_window = navigate_des(3) 
 
-    # Handle sign-out functionality
+    # if the user clicks to sign out, they will be 'signed out' (although the functionality isnt in place yet)
     if event == 'Sign Out':
         sg.popup('Signing Out...')
-        # Here you can add functionality to sign out the user
-        # For example, close all windows and maybe redirect to a login screen
 
-    # Add functionality to return to the lobby from charts
+    # if the user clicks to go back to the lobby, the current window (chart page) is closed and the lobby page opens up
     if event == '-BACK_LOBBY-':
-        current_window.close()  # Close the chart window
-        current_window = create_lobby_window()  # Reopen the lobby window
+        current_window.close()  
+        current_window = create_lobby_window() 
 
 
-
-# Close the window when done
-current_window.close()
+# making sure the window is closed when its exited out
+current_window.close() 
