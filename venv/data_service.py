@@ -6,22 +6,22 @@ import numpy as np
 
 
 class DataService:
-    def __init__(self, file_path):
-        self.file_path = file_path
-        self.data = self.read_data()
+    def __init__(self, file_path=None):
+        self.data = pd.DataFrame()
+        if file_path:
+            try:
+                  self.data = pd.read_csv(file_path)
+            except Exception as e:
+                    print(f"Error loading data: {str(e)}")
 
     def read_data(self):
         if os.path.exists(self.file_path):
-                return pd.read.csv(self.file_path)
+                return pd.read_csv(self.file_path)
         else:
             return pd.DataFrame()
         
     def merge_data(self, new_data):
-        if not self.data.empty:
-            self.data = pd.concat([self.data, new_data], ignore_index = True)
-        else:
-            self.data = new_data
-        self.save_data()
+        self.data = pd.concat([self.data, new_data], ignore_index = True)
 
         
 

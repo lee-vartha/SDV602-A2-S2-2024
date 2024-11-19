@@ -4,12 +4,13 @@ from data_service import DataService
 from lobby import create_lobby_window 
 from register import login_register_window
 from user_manager import UserManager
-from screens import navigate_des, select_file, upload_data
+from screens import navigate_and_handle_des, select_file, upload_data
 
 def main():
     user_manager = UserManager()
 
     data_service = DataService(file_path='data.csv')
+    print(data_service.data)
     login_register_window()
 
     if user_manager.current_status == "Logged In":
@@ -26,15 +27,15 @@ def main():
                 # if in the lobby, if the user clicks on any of the buttons, the window is closed and the user is taken to the corresponding page
             if event == 'Data Chart 1':
                 current_window.close()
-                current_window = navigate_des(1, data_service)
+                current_window = navigate_and_handle_des(1, data_service)
 
             elif event == 'Data Chart 2':
                 current_window.close()
-                current_window = navigate_des(2, data_service)
+                current_window = navigate_and_handle_des(2, data_service)
 
             elif event == 'Data Chart 3':
                 current_window.close() 
-                current_window = navigate_des(3, data_service) 
+                current_window = navigate_and_handle_des(3, data_service) 
 
             # if the user clicks to sign out, they will be 'signed out' (although the functionality isnt in place yet)
             if event == 'Sign Out':

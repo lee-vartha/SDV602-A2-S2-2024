@@ -1,4 +1,3 @@
-# importing the important libraries
 import PySimpleGUI as sg
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -6,6 +5,7 @@ import io
 import numpy as np
 from PIL import Image
 from data_service import DataService
+from register import login_register_window
 from data_service import create_chart_des1, create_chart_des2, create_chart_des3
 
 def select_file():
@@ -42,6 +42,75 @@ def upload_image(image_path):
         return None
     
 #where the charts can go
+    # creating the function for the first chart popup (for the first DES page)
+def create_chart_des1(data):
+    if data.empty:
+        return None
+    
+    # figure means the entire plot, axis is the actual plot
+    figure, axis = plt.subplots()
+    # the sources are just dummy data - in part 2, the actual data would be conducted
+    source = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+    usage = [23, 22, 16, 11, 9, 9, 5]
+
+    # designing the bar chart - including the source, usage and creating colours for it
+    axis.bar(source, usage, color=['green', 'red', 'blue', 'orange', 'gray', 'yellow', 'purple'])
+    # setting the title and the label for the chart
+    axis.set_title('Music Consumption Source (%)', fontsize=10)
+    axis.set_ylabel('Percentage', fontsize=8)
+
+    # saving the plot as PNG - this is necessary since PySimpleGUI only accepts PNG images
+    buf = io.BytesIO()
+    plt.savefig(buf, format='PNG')
+    plt.close(figure)
+    buf.seek(0)
+    return buf
+
+# creating the function for the second chart (for the second DES page)
+def create_chart_des2(data):
+    if data.empty:
+        return None
+
+    figure, axis = plt.subplots()
+    # the services and usage are dummy data
+    services = ['a', 'b', 'c', 'd', 'e']
+    usage = [1, 2, 3, 4, 5]
+
+    # creating a PIE chart - autopct is percentage, which shows up on the pie chart 
+    axis.pie(usage, labels=services, autopct='%1.1f%%')
+    # setting the title
+    axis.set_title('Music Pie Chart (%), fontsize=10')
+
+    # saving the plot as PNG
+    buf = io.BytesIO()
+    plt.savefig(buf, format='PNG')
+    plt.close(figure)
+    buf.seek(0)
+    return buf
+
+# creating the function for the third chart (for the third DES page)
+# this is linked from https://matplotlib.org/stable/gallery/lines_bars_and_markers/simple_plot.html#sphx-glr-gallery-lines-bars-and-markers-simple-plot-py
+# ^^ for inspiration for the meantime
+def create_chart_des3(data):
+    if data.empty:
+        return None
+
+        # Data for plotting
+    t = np.arange(0.0, 2.0, 0.01)
+    s = 1 + np.sin(2 * np.pi * t)
+
+    figure, axis = plt.subplots()
+    axis.plot(t, s)
+
+    axis.set(xlabel='time (s)', ylabel='voltage (mV)',
+        title='About as simple as it gets, folks')
+    axis.grid()
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='PNG')
+    plt.close(figure)
+    buf.seek(0)
+    return buf
 
 # creating the window for the charts
 def create_window(title, chart_function, data_service):
@@ -67,13 +136,16 @@ def create_window(title, chart_function, data_service):
     
     # creating the window
     window = sg.Window('Data Explorer', layout, finalize=True, resizable=True)
-    chart_image = chart_function(data_service)
-    window['-IMAGE-'].update(data=chart_image.read()) # ensuring the chart always loads up
-
+    chart_image = chart_function(data_service.data)
+    if chart_image:
+        window['-IMAGE-'].update(data=chart_image.read()) # ensuring the chart always loads up
+    else:
+        sg.popup_error('No data available to create chart')
     return window
 
 # navigating through each DES page
 def navigate_des(des_index, data_service):
+
     if des_index == 1:
         return create_window('A Statistical Analysis of Music Consumption - Chart 1', create_chart_des1, data_service) # the title for the first DES
     elif des_index == 2: 
@@ -83,54 +155,58 @@ def navigate_des(des_index, data_service):
     
 # mapping the des index to the window
 data_service = DataService(file_path = 'data.csv')
-des_index = 1
-window = navigate_des(des_index, data_service)
+if login_register_window():
+    des_index = 1
+    window = navigate_des(des_index, data_service)
+
+def navigate_and_handle_des(des_index, data_service):
+    window = navigate_des(des_index, data_service)
+    while True:
+        event, values = window.read()
 
 
-while True:
-    event, values = window.read()
+        if event == sg.WIN_CLOSED or event == '-BACK_LOBBY-':
+            break
+
+            # if the user clicks on 'next', the index will be incremented by 1 and the window will be closed and the next DES will be opened
+        if event == '-NEXT-':
+            des_index += 1 if des_index == 3 else des_index + 1
+            window.close()
+            window = navigate_des(des_index, data_service)
+
+            # if the user clicks on 'prev', the index will be decremented by 1 and the window will be closed and the previous DES will be opened
+        if event == '-PREV-':
+            des_index = 3 if des_index == 1 else des_index - 1
+            window.close()
+            window = navigate_des(des_index, data_service)
+
+        # if the user uploads an image (part 2 of milestone 3) then the image will be uploaded (should only be either png or jpg)
+        if event == '-UPLOAD_DATA':
+            file_path = select_file()
+            if file_path:
+                new_data = upload_data(file_path) 
+                if new_data is not None:
+                    data_service.merge_data(new_data)
+                    sg.popup("Data is uploaded")
+
+        # if the user clicks 'set image', then it will create the chart for the respective DES page the user is on (updates it)
+        if event == '-SET_CHART-':
+            chart_image = (create_chart_des1(data_service.data) if des_index == 1 else 
+            create_chart_des2(data_service.data) if des_index == 2 else
+            create_chart_des3(data_service.data))
+
+            if chart_image:
+                window['-IMAGE-'].update(data=chart_image.read())
+            else:
+                sg.popup_error('No data available to create chart')
 
 
-    if event == sg.WIN_CLOSED or event == '-BACK_LOBBY-':
-        break
+        # if the user clicks 'send' for the chatbox, then it will update the chatbox with the message the user has sent
+        if event == '-SEND_MSG-':
+            message = values['-CHAT_INPUT-']
+            if message:
+                current_chat = window['-CHATBOX-'].get()
+                window['-CHATBOX-'].update(f'{current_chat}\nYou: {message}')
+                window['-CHAT_INPUT-'].update('')
 
-        # if the user clicks on 'next', the index will be incremented by 1 and the window will be closed and the next DES will be opened
-    if event == '-NEXT-':
-        des_index += 1
-        if des_index > 3:
-            des_index = 1
-        window.close()
-        window = navigate_des(des_index, data_service)
-
-        # if the user clicks on 'prev', the index will be decremented by 1 and the window will be closed and the previous DES will be opened
-    if event == '-PREV-':
-        des_index -= 1
-        if des_index < 1:
-            des_index = 3
-        window.close()
-        window = navigate_des(des_index, data_service)
-
-    # if the user uploads an image (part 2 of milestone 3) then the image will be uploaded (should only be either png or jpg)
-    if event == '-UPLOAD_DATA':
-        file_path = sg.popup_get_file('Get file', file_types=(('CSV Files', '*.csv'),))
-        if file_path:
-            new_data = pd.read_sdv(file_path) 
-            data_service.merge_data(new_data)
-            chart_image = data_service.create_chart_des1() if des_index == 1 else data_service.create_chart_des2() if des_index == 2 else data_service.create_chart_des3()
-            window['-IMAGE-'].update(data=chart_image.read())
-
-    # if the user clicks 'set image', then it will create the chart for the respective DES page the user is on (updates it)
-    if event == '-SET_IMAGE-':
-        chart_image = create_chart_des1() if des_index == 1 else create_chart_des2() if des_index == 2 else create_chart_des3()
-        window['-IMAGE-'].update(data=chart_image.read())
-
-    # if the user clicks 'send' for the chatbox, then it will update the chatbox with the message the user has sent
-    if event == '-SEND_MSG-':
-        message = values['-CHAT_INPUT-']
-        if message:
-            current_chat = window['-CHATBOX-'].get()
-            window['-CHATBOX-'].update(f'{current_chat}\nYou: {message}')
-            window['-CHAT_INPUT-'].update('')
-
-window.close()
-    
+    window.close()
