@@ -3,7 +3,7 @@ import PySimpleGUI as sg
 
 # creating the lobby window
 def create_lobby_window():
-    lobby_layout = [
+    layout = [
         [sg.Text('Lobby For Analyst', font=('Helvetica', 16), justification='center', expand_x=True)],  # title for the page
 
         # the necessary buttons (for each data chart page)
@@ -16,5 +16,5 @@ def create_lobby_window():
     ]
 
     # creating the window
-    lobby_window = sg.Window('Lobby', lobby_layout, element_justification='center', finalize=True)
+    lobby_window = sg.Window('Lobby', layout, element_justification='center', finalize=True)
     return lobby_window

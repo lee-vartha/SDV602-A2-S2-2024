@@ -153,11 +153,11 @@ def navigate_des(des_index, data_service):
     elif des_index == 3:
         return create_window('A Statistical Analysis of Music Consumption - Chart 3', create_chart_des3, data_service)  # the title for the third DES
     
-# mapping the des index to the window
-data_service = DataService(file_path = 'data.csv')
-if login_register_window():
-    des_index = 1
-    window = navigate_des(des_index, data_service)
+# # mapping the des index to the window
+# data_service = DataService(file_path = 'data.csv')
+# if login_register_window():
+#     des_index = 1
+#     window = navigate_des(des_index, data_service)
 
 def navigate_and_handle_des(des_index, data_service):
     window = navigate_des(des_index, data_service)

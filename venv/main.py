@@ -8,9 +8,8 @@ from screens import navigate_and_handle_des, select_file, upload_data
 
 def main():
     user_manager = UserManager()
-
     data_service = DataService(file_path='data.csv')
-    print(data_service.data)
+
     login_register_window()
 
     if user_manager.current_status == "Logged In":

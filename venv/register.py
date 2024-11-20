@@ -2,6 +2,8 @@ import PySimpleGUI as sg
 import json
 import os
 from user_manager import UserManager
+from data_service import DataService
+from lobby import create_lobby_window
 
 user_manager = UserManager()
 
@@ -34,6 +36,8 @@ def login_user(username, password):
     return False, "Invalid username or password!"
 
 
+data_service = DataService(file_path='data.csv')
+
 def login_register_window():
     sg.theme("LightGreen")
 
@@ -52,7 +56,9 @@ def login_register_window():
         event, values = window.read()
         
         if event == sg.WINDOW_CLOSED or event == "Exit":
-            break
+            window.close()
+            return False
+        
         username = values["-USERNAME-"]
         password = values["-PASSWORD-"]
 
@@ -63,7 +69,8 @@ def login_register_window():
             login_status = user_manager.login(username, password)
             if login_status == "Login Success":
                 sg.popup("Welcome!", f"You are logged in as: {username}!")
-                break
+                window.close()
+                return True
             else:
                 window["-MESSAGE-"].update(login_status)
 
@@ -74,11 +81,16 @@ def login_register_window():
             register_status = user_manager.register(username, password)
             if register_status == "Registration Success":
                 sg.popup("Success!", "You can now log in!")
+                window.close()
+                return True
             else:
                 window["-MESSAGE-"].update(register_status)
 
-    window.close()
-
+        window.close()
+        return False
+    
 # Run the program
 if __name__ == "__main__":
-    login_register_window()
+
+    if login_register_window():
+        create_lobby_window()

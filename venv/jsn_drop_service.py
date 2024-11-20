@@ -25,7 +25,7 @@ class jsnDrop(object):
         api_call["cmd"] = command
         payload = {'tok': self.encode(api_call)}
 
-        print (f"API CALL PAYLOAD = {payload}")
+        # print (f"API CALL PAYLOAD = {payload}")
 
         r = requests.get(self.url, payload)
 
@@ -33,7 +33,7 @@ class jsnDrop(object):
         self.jsnStatus = jsnResponse["JsnMsg"]
         self.jsnResult = jsnResponse["Msg"]
 
-        print(f"Status = {self.jsnStatus}, Result = {self.jsnResult}")
+        # print(f"Status = {self.jsnStatus}, Result = {self.jsnResult}")
         return self.jsnResult
 
 

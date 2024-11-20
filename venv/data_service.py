@@ -7,12 +7,18 @@ import numpy as np
 
 class DataService:
     def __init__(self, file_path=None):
+        self.file_path = file_path
         self.data = pd.DataFrame()
         if file_path:
-            try:
-                  self.data = pd.read_csv(file_path)
-            except Exception as e:
-                    print(f"Error loading data: {str(e)}")
+            self.load_data(file_path)
+
+
+    def load_data(self, file_path):
+        try:
+              self.data = pd.read_csv(file_path)
+        except Exception as e:
+            print(f"Error loading data: {str(e)}")
+    
 
     def read_data(self):
         if os.path.exists(self.file_path):
@@ -23,8 +29,7 @@ class DataService:
     def merge_data(self, new_data):
         self.data = pd.concat([self.data, new_data], ignore_index = True)
 
-        
-
+    
     def save_data(self):
         self.data.to_csv(self.file_path, index = False)
 
@@ -33,13 +38,11 @@ class DataService:
 def create_chart_des1(self):
     if self.data.empty:
             return None
-    source = self.data['source']
-    usage = self.data['usage']
+
     # figure means the entire plot, axis is the actual plot
     figure, axis = plt.subplots()
-    # the sources are just dummy data - in part 2, the actual data would be conducted
-    source = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
-    usage = [23, 22, 16, 11, 9, 9, 5]
+    source = self.data['source'].value_counts().index.tolist()[:7]
+    usage = self.data['source'].value_counts().tolist()[:7]
 
     # designing the bar chart - including the source, usage and creating colours for it
     axis.bar(source, usage, color=['green', 'red', 'blue', 'orange', 'gray', 'yellow', 'purple'])
@@ -58,8 +61,8 @@ def create_chart_des1(self):
 def create_chart_des2(self):
     if self.data.empty:
         return None
-    services = self.data['services']
-    usage = self.data['usage']
+    services = self.data['services'].value_counts().index.tolist()[:7]
+    usage = self.data['services'].value_counts().tolist()[:7]
 
     figure, axis = plt.subplots()
     # the services and usage are dummy data
@@ -86,8 +89,8 @@ def create_chart_des3(self):
         return None
 
         # Data for plotting
-    t = np.arange(0.0, 2.0, 0.01)
-    s = 1 + np.sin(2 * np.pi * t)
+    t = self.data['t'].value_counts().index.tolist()[:7]
+    s = self.data['t'].value_counts().tolist()[:7]
 
     figure, axis = plt.subplots()
     axis.plot(t, s)
