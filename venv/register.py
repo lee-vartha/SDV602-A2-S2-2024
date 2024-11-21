@@ -51,16 +51,17 @@ def login_register_window():
 
     window = sg.Window("Login/Register", layout, finalize=True)
 
+    
 
     while True:
         event, values = window.read()
         
-        if event == sg.WINDOW_CLOSED or event == "Exit":
-            window.close()
-            return False
-        
         username = values["-USERNAME-"]
         password = values["-PASSWORD-"]
+
+        if event == sg.WINDOW_CLOSED or event == "Exit":
+            window.close()
+        
 
         if event == "Login":
             if not username or not password:
