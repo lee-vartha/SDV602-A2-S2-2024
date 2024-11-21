@@ -5,6 +5,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 import io
 import numpy as np
 from PIL import Image
+from chat_view import ChatView
+
 from register import login_register_window
 from lobby import create_lobby_window
 from data_service import DataService
@@ -128,8 +130,7 @@ def create_window(title, chart_function, data_service):
               ),
               sg.Column(
                   [
-                    [sg.Button('Upload Data', key='-UPLOAD_DATA', font=('Bell MT', 15)), # the button to upload the image
-                     sg.Button('Set Chart', key='-SET_CHART-', font=('Bell MT', 15))], # the button to set the chart
+                    [sg.Button('Upload Data', key='-UPLOAD_DATA', font=('Bell MT', 15))], # the button to upload the image 
                     [sg.Multiline(size=(30, 16), key='-CHATBOX-', # the placeholder for the chatbox
                                  disabled=True, autoscroll=True, font=('Bell MT', 15))],
                     [sg.Input(key='-CHAT_INPUT-', size=(25, 5), font=('Bell MT', 15)), # the textbox for the chat
@@ -216,16 +217,6 @@ def navigate_and_handle_des(des_index, data_service):
                         data_service.merge_data(new_data)
                         sg.popup("Data is uploaded")
 
-            # if the user clicks 'set image', then it will create the chart for the respective DES page the user is on (updates it)
-            if event == '-SET_CHART-':
-                chart_image = (create_chart_des1(data_service.data) if des_index == 1 else 
-                create_chart_des2(data_service.data) if des_index == 2 else
-                create_chart_des3(data_service.data))
-
-                if chart_image:
-                    window['-CANVAS-'].update(data=chart_image.read())
-                else:
-                    sg.popup_error('No data available to create chart')
 
 
             # if the user clicks 'send' for the chatbox, then it will update the chatbox with the message the user has sent
